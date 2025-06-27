@@ -21,7 +21,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
     "http://localhost:5173",  # Vite dev server
-    "http://scomaton.duckdns.org",  # If you ever serve frontend here
+    "https://scomaton-backend.onrender.com/",  # If you ever serve frontend here
 ],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
