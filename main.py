@@ -6,10 +6,37 @@ from dotenv import load_dotenv
 import json
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
+from collections import defaultdict
 
 
 load_dotenv()
+
+def get_today_token_usage():
+    total = 0
+    today = datetime.utcnow().date()
+
+    try:
+        with open(LOG_FILE, "r") as f:
+            for line in f:
+                entry = json.loads(line)
+                timestamp = datetime.fromisoformat(entry["timestamp"])
+                if timestamp.date() == today:
+                    total += entry.get("total_tokens", 0)
+    except FileNotFoundError:
+        pass
+
+    return total
+
+
+def summarize_messages(messages):
+    summary = "Earlier: "
+    for msg in messages:
+        if msg["role"] == "user":
+            summary += f"User asked about '{msg['content'][:30]}...', "
+        elif msg["role"] == "assistant":
+            summary += f"Assistant replied with '{msg['content'][:30]}...', "
+    return {"role": "system", "content": summary.strip(", ")}
+
 
 app = FastAPI()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -59,7 +86,14 @@ def chat(input: ChatInput):
         "Content-Type": "application/json"
     }
 
+    # Add user message
     conversation_history.append({"role": "user", "content": input.prompt})
+
+    # Summarize and trim if needed (before assistant responds)
+    if len(conversation_history) > 11:
+        old_msgs = conversation_history[1:-9]  # exclude system prompt and last 9
+        summary_msg = summarize_messages(old_msgs)
+        conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-9:]
 
     data = {
         "model": "llama3-70b-8192",
@@ -70,7 +104,7 @@ def chat(input: ChatInput):
 
     print("Sending to Groq:", data)
 
-    response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=data)
+    response = requests.post(GROQ_API_URL, headers=headers, json=data)
 
     if response.status_code != 200:
         print("Groq error:", response.status_code, response.text)
@@ -79,16 +113,22 @@ def chat(input: ChatInput):
     res_json = response.json()
     ai_response = res_json["choices"][0]["message"]["content"].strip()
 
-    # ✅ Add AI response to memory
+    # Add assistant response
     conversation_history.append({"role": "assistant", "content": ai_response})
 
-    # Track usage
+    # Trim again if needed
+    if len(conversation_history) > 12:
+        old_msgs = conversation_history[1:-10]
+        summary_msg = summarize_messages(old_msgs)
+        conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-10:]
+
+    # Token usage tracking
     usage = res_json.get("usage", {})
     prompt_tokens = usage.get("prompt_tokens", 0)
     completion_tokens = usage.get("completion_tokens", 0)
     total_tokens = usage.get("total_tokens", 0)
 
-    # Log to file
+    # Log usage
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
         "prompt_tokens": prompt_tokens,
@@ -98,16 +138,28 @@ def chat(input: ChatInput):
     with open(LOG_FILE, "a") as f:
         f.write(json.dumps(log_entry) + "\n")
 
+    # Daily usage warning
+    today_total = get_today_token_usage()
+    daily_limit = 33000
+    warning = None
+    if today_total > daily_limit:
+        warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
     print(f"[Token Usage] Prompt: {prompt_tokens}, Completion: {completion_tokens}, Total: {total_tokens}")
+    if warning:
+        print(warning)
 
     return {
         "response": ai_response,
         "tokens": {
             "prompt": prompt_tokens,
             "completion": completion_tokens,
-            "total": total_tokens
+            "total": total_tokens,
+            "daily_total": today_total,
+            "warning": warning
         }
     }
+
 
 
 
@@ -148,3 +200,19 @@ def usage_stats():
 def reset_memory():
     conversation_history[:] = conversation_history[:1]  # Keep system prompt only
     return {"message": "Memory cleared"}
+
+
+
+@app.get("/daily-tokens")
+def daily_tokens():
+    daily_limit = 33000
+    used = get_today_token_usage()
+    remaining = max(daily_limit - used, 0)
+    approx_responses_left = remaining // 1000
+
+    return {
+        "daily_limit": daily_limit,
+        "tokens_used_today": used,
+        "tokens_remaining": remaining,
+        "estimated_responses_left": approx_responses_left
+    }
