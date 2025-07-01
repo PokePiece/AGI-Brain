@@ -14,13 +14,13 @@ import os
 
 load_dotenv()
 
-llm = Llama(
-    model_path="models/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf",
-    n_ctx=2048,
-    n_threads=4,
-    n_batch=32,
-    verbose=False
-)
+#llm = Llama(
+    #model_path="models/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf",
+    #n_ctx=2048,
+   # n_threads=4,
+    #n_batch=32,
+    #verbose=False
+#)
 
 
 def build_prompt(instruction: str) -> str:
@@ -245,8 +245,8 @@ def daily_tokens():
 
 
 
-@app.post("/route-task")
-async def route_task(request: Request):
+#@app.post("/route-task")
+#async def route_task(request: Request):
     data = await request.json()
     instruction = data.get("instruction", "")
 
