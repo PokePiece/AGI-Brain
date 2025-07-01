@@ -247,12 +247,12 @@ def daily_tokens():
 
 #@app.post("/route-task")
 #async def route_task(request: Request):
-    data = await request.json()
-    instruction = data.get("instruction", "")
+    #data = await request.json()
+    #instruction = data.get("instruction", "")
 
-    prompt = build_prompt(instruction)
+    #prompt = build_prompt(instruction)
 
-    result = llm(prompt, max_tokens=10, stop=["\n"])
-    output = result["choices"][0]["text"].strip().lower()
+    #result = llm(prompt, max_tokens=10, stop=["\n"])
+    #output = result["choices"][0]["text"].strip().lower()
 
-    return {"task_type": output}
+    #return {"task_type": output}
