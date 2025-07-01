@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from collections import defaultdict
 from fastapi import FastAPI, Request
-from llama_cpp import Llama
+#from llama_cpp import Llama
 import os
 
 
