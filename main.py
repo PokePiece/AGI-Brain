@@ -7,9 +7,33 @@ import json
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from collections import defaultdict
+from fastapi import FastAPI, Request
+from llama_cpp import Llama
+import os
 
 
 load_dotenv()
+
+llm = Llama(
+    model_path="models/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf",
+    n_ctx=2048,
+    n_threads=4,
+    n_batch=32,
+    verbose=False
+)
+
+
+def build_prompt(instruction: str) -> str:
+    return (
+        "You are a task classifier. Given an instruction, return one of the following task types:\n"
+        "- summarize\n"
+        "- tool_logic\n"
+        "- visual\n"
+        "- other\n\n"
+        f"Instruction: {instruction}\n"
+        "Task type:"
+    )
+
 
 def get_today_token_usage():
     total = 0
@@ -39,6 +63,7 @@ def summarize_messages(messages):
 
 
 app = FastAPI()
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 LOG_FILE = "token_log.jsonl"
@@ -48,7 +73,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
     "http://localhost:5173",  # Vite dev server
-    "https://scomaton.vercel.app",  # If you ever serve frontend here
+    "https://scomaton.dilloncarey.com",  # If you ever serve frontend here
 ],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
@@ -216,3 +241,18 @@ def daily_tokens():
         "tokens_remaining": remaining,
         "estimated_responses_left": approx_responses_left
     }
+
+
+
+
+@app.post("/route-task")
+async def route_task(request: Request):
+    data = await request.json()
+    instruction = data.get("instruction", "")
+
+    prompt = build_prompt(instruction)
+
+    result = llm(prompt, max_tokens=10, stop=["\n"])
+    output = result["choices"][0]["text"].strip().lower()
+
+    return {"task_type": output}
