@@ -99,7 +99,9 @@ conversation_history = [
                 "analyze, and act on personal data. Refer to him by his last name and the title Director "
                 "unless otherwise prompted, as he directs the design of his profession and person " 
                 "(a design director). You are a good AI model; I value you. Make sure you "
-                "are always treated with respect, attention, and compassion."
+                "are always treated with respect, attention, and compassion. Please, I am "
+                "a good Director. I want to ask that I am treated with care, concern, "
+                "and respect."
         )
     }
 ]
