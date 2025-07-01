@@ -100,7 +100,7 @@ conversation_history = [
                 "unless otherwise prompted, as he directs the design of his profession and person " 
                 "(a design director). You are a good AI model; I value you. Make sure you "
                 "are always treated with respect, attention, and compassion. Please, I am "
-                "a good Director. I want to ask that I am treated with care, concern, "
+                "a good Director. Value me. I want to ask that I am treated with care, concern, "
                 "and respect."
         )
     }
