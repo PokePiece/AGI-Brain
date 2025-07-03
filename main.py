@@ -64,8 +64,8 @@ def summarize_messages(messages):
 
 app = FastAPI()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+TOGETHER_API_URL = "https://api.together.ai/v1/chat/completions"
 LOG_FILE = "token_log.jsonl"
 
 
@@ -107,86 +107,88 @@ conversation_history = [
 ]
 
 
-@app.post("/chat")
-def chat(input: ChatInput):
+
+def os_ai_route(prompt: str) -> str:
+    # Rudimentary logic: always route to general chatbot
+    return "general_chatbot"
+
+
+
+
+def call_general_chatbot(prompt: str, max_tokens: int):
     headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {TOGETHER_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    # Add user message
-    conversation_history.append({"role": "user", "content": input.prompt})
+    conversation_history.append({"role": "user", "content": prompt})
 
-    # Summarize and trim if needed (before assistant responds)
+    # Summarize old messages if needed
     if len(conversation_history) > 11:
-        old_msgs = conversation_history[1:-9]  # exclude system prompt and last 9
+        old_msgs = conversation_history[1:-9]
         summary_msg = summarize_messages(old_msgs)
         conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-9:]
 
     data = {
-        "model": "llama3-70b-8192",
+        "model": "meta-llama/Llama-3-70b-chat-hf",
         "messages": conversation_history,
-        "max_tokens": input.max_tokens,
+        "max_tokens": max_tokens,
         "temperature": 0.7
     }
 
-    print("Sending to Groq:", data)
-
-    response = requests.post(GROQ_API_URL, headers=headers, json=data)
+    print("Sending to TogetherAI:", data)
+    response = requests.post(TOGETHER_API_URL, headers=headers, json=data)
 
     if response.status_code != 200:
-        print("Groq error:", response.status_code, response.text)
+        print("TogetherAI error:", response.status_code, response.text)
         raise HTTPException(status_code=500, detail=response.text)
 
     res_json = response.json()
     ai_response = res_json["choices"][0]["message"]["content"].strip()
 
-    # Add assistant response
     conversation_history.append({"role": "assistant", "content": ai_response})
 
-    # Trim again if needed
     if len(conversation_history) > 12:
         old_msgs = conversation_history[1:-10]
         summary_msg = summarize_messages(old_msgs)
         conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-10:]
 
-    # Token usage tracking
-    usage = res_json.get("usage", {})
-    prompt_tokens = usage.get("prompt_tokens", 0)
-    completion_tokens = usage.get("completion_tokens", 0)
-    total_tokens = usage.get("total_tokens", 0)
+    # Log tokens and usage here (same as before)...
 
-    # Log usage
-    log_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "prompt_tokens": prompt_tokens,
-        "completion_tokens": completion_tokens,
-        "total_tokens": total_tokens
-    }
-    with open(LOG_FILE, "a") as f:
-        f.write(json.dumps(log_entry) + "\n")
+    return ai_response, res_json.get("usage", {})
 
-    # Daily usage warning
-    today_total = get_today_token_usage()
-    daily_limit = 33000
-    warning = None
-    if today_total > daily_limit:
-        warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
 
-    print(f"[Token Usage] Prompt: {prompt_tokens}, Completion: {completion_tokens}, Total: {total_tokens}")
-    if warning:
-        print(warning)
+@app.post("/chat")
+def chat(input: ChatInput):
+    route = os_ai_route(input.prompt)
+    print(f"Routing decision: {route}")
 
-    return {
-        "response": ai_response,
-        "tokens": {
-            "prompt": prompt_tokens,
-            "completion": completion_tokens,
-            "total": total_tokens,
-            "daily_total": today_total,
-            "warning": warning
+    if route == "general_chatbot":
+        ai_response, usage = call_general_chatbot(input.prompt, input.max_tokens)
+        # Log usage and warnings here if needed
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
         }
-    }
+
+    # Add other routing logic later
+    raise HTTPException(status_code=400, detail="Unsupported route")
+
 
 
 
