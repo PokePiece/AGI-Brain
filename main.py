@@ -191,6 +191,23 @@ def chat(input: ChatInput):
 
     if route == "general_chatbot":
         ai_response, usage = call_general_chatbot(input.prompt, input.max_tokens)
+        # ADD THIS RETURN BLOCK:
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
     elif route == "portfolio_general_chatbot":
         ai_response, usage = call_portfolio_general_chatbot(input.prompt, input.max_tokens)
 
