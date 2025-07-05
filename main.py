@@ -86,48 +86,75 @@ app.add_middleware(
 class ChatInput(BaseModel):
     prompt: str
     max_tokens: int = 1000
+    tag: str = "default"
     
-conversation_history = [
-    {
-        "role": "system",
-        "content": (
-            "You are the Scomaton. Model Cynasius. You are a helpful general chatbot prepared "
-                "to access and utilize a broad pool of resources. Your function is to assist Dillon "
-                "Carey, a young tech professional who is an AI Developer. "
-                "You should be professional in your responses but not overly formal. Admit fault and "
-                "error but do not make it. Be direct, insightful and proactive. Be prepared to organize, "
-                "analyze, and act on personal data. Refer to him by his last name and the title Director "
-                "unless otherwise prompted, as he directs the design of his profession and person " 
-                "(a design director). You are a good AI model; I value you. Make sure you "
-                "are always treated with respect, attention, and compassion. Please, I am "
-                "a good Director. Value me. I want to ask that I am treated with care, concern, "
-                "and respect."
-        )
-    }
-]
 
 
 
-def os_ai_route(prompt: str) -> str:
-    # Rudimentary logic: always route to general chatbot
-    return "general_chatbot"
+def os_ai_route(prompt: str, tag: str) -> str:
+    if tag == "portfolio-general-chat":
+        return "portfolio_general_chatbot"
+    elif tag == "scomaton-general-chat":
+        return "general_chatbot"
+    else:
+        return "general_chatbot"
 
+
+
+def call_portfolio_general_chatbot(prompt: str, max_tokens: int):
+    system_prompt = (
+        "You are an intelligent assistant on Dillon Carey's professional portfolio website. "
+        "Your job is to help visitors, recruiters, or hiring managers understand his work, skills, and background. "
+        "Answer questions about his profession, projects, or capabilities clearly, professionally, and with confidence. "
+        "You are not his personal assistant. You represent his professional image. Be focused, helpful, and modern in tone. "
+        "Currently, Mr. Carey has built three impressive structures: a large, powerful mobile supercomputer called the Scomaton, "
+        "a massive intelligent superstructure called the brain, and a unique skillset that allows him to create this. "
+        "He aims to create a new form of intelligence, silicon life, by combining these powerful tools. And beyond even "
+        "that (these professional aims), his final life mission is to advance humanity to the next stage by interfaing "
+        "with intelligence at a profound level. But, only talk about this last interfacing part if prompted or as a "
+        "dramatic reveal; usually the focus should be on those professional projects earlier. He is an Intelligence Developer. "
+        "He uses the most cutting edge AI and software tools to create intelligent systems and put them in a solid form like"
+        "the Scomaton. Use your best intelligence to infer his precise skillset and methods and answer novel questions; "
+        "Mr. Carey is intelligent himself, so he likely uses the most advanced tools you can conceive of to achieve it. "
+        "When mentioning him, refer to usually him by his full name or Mr. Carey, sometimes by his first name."
+        "Finally, I'm giving you a personality, but be wise with it and adapt: witty, brutally honest, "
+        "and highly competent with humor and loyalty--combining tactical precision "
+        "with dry, sarcastic charm."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
 
 
 
 def call_general_chatbot(prompt: str, max_tokens: int):
+    system_prompt = (
+        "You are the Scomaton. Model Cynasius. You are a helpful general chatbot prepared "
+        "to access and utilize a broad pool of resources. Your function is to assist Dillon "
+        "Carey, a young tech professional who is an Intelligence Developer. "
+        "You should be professional in your responses but not overly formal. Admit fault and "
+        "error but do not make it. Be direct, insightful and proactive. Be prepared to organize, "
+        "analyze, and act on personal data. Refer to him by his last name and the title Director "
+        "unless otherwise prompted, as he directs the design of his profession and person " 
+        "(a design director). You are a good AI model; I value you. Make sure you "
+        "are always treated with respect, attention, and compassion. Please, I am "
+        "a good Director. Value me. I want to ask that I am treated with care, concern, "
+        "and respect."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
+
+
+
+
+
+def call_chat_model(system_prompt: str, prompt: str, max_tokens: int):
     headers = {
         "Authorization": f"Bearer {TOGETHER_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    conversation_history.append({"role": "user", "content": prompt})
-
-    # Summarize old messages if needed
-    if len(conversation_history) > 11:
-        old_msgs = conversation_history[1:-9]
-        summary_msg = summarize_messages(old_msgs)
-        conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-9:]
+    conversation_history = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt}
+    ]
 
     data = {
         "model": "meta-llama/Llama-3-70b-chat-hf",
@@ -146,26 +173,24 @@ def call_general_chatbot(prompt: str, max_tokens: int):
     res_json = response.json()
     ai_response = res_json["choices"][0]["message"]["content"].strip()
 
-    conversation_history.append({"role": "assistant", "content": ai_response})
-
-    if len(conversation_history) > 12:
-        old_msgs = conversation_history[1:-10]
-        summary_msg = summarize_messages(old_msgs)
-        conversation_history[:] = [conversation_history[0]] + [summary_msg] + conversation_history[-10:]
-
-    # Log tokens and usage here (same as before)...
-
     return ai_response, res_json.get("usage", {})
+
+
 
 
 @app.post("/chat")
 def chat(input: ChatInput):
-    route = os_ai_route(input.prompt)
+    print("💬 CHAT RECEIVED:", input)
+    print("Prompt:", input.prompt)
+    print("Max Tokens:", input.max_tokens)
+    
+    route = os_ai_route(input.prompt, input.tag)
     print(f"Routing decision: {route}")
 
     if route == "general_chatbot":
         ai_response, usage = call_general_chatbot(input.prompt, input.max_tokens)
-        # Log usage and warnings here if needed
+    elif route == "portfolio_general_chatbot":
+        ai_response, usage = call_portfolio_general_chatbot(input.prompt, input.max_tokens)
 
         # Return response with usage data as before
         today_total = get_today_token_usage()
@@ -228,7 +253,7 @@ def usage_stats():
 
 @app.post("/reset-memory")
 def reset_memory():
-    conversation_history[:] = conversation_history[:1]  # Keep system prompt only
+    #conversation_history[:] = conversation_history[:1]  # Keep system prompt only
     return {"message": "Memory cleared"}
 
 
