@@ -74,6 +74,8 @@ app.add_middleware(
     allow_origins=[
     "http://localhost:5173",  # Vite dev server
     "https://scomaton.dilloncarey.com",  # If you ever serve frontend here
+    "https://dilloncarey.com",
+    "https://www.dilloncarey.com",
 ],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
