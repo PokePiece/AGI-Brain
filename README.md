@@ -127,7 +127,7 @@ Start Command: ./start.sh
 Manually add .env variables
 
 🔒 Security Notes
-This backend connects to external AI models and may process sensitive data. Current protections include:
+This system connects to external AI models and may process sensitive data. Current protections include:
 
 API key stored in .env
 
