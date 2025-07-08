@@ -98,6 +98,8 @@ def os_ai_route(prompt: str, tag: str) -> str:
         return "portfolio_general_chatbot"
     elif tag == "scomaton-general-chat":
         return "general_chatbot"
+    elif tag =='brain_interface':
+        return 'brain_interface'
     else:
         return "general_chatbot"
 
@@ -140,7 +142,23 @@ def call_general_chatbot(prompt: str, max_tokens: int):
     return call_chat_model(system_prompt, prompt, max_tokens)
 
 
-
+def call_brain_interface(prompt: str, max_tokens: int):
+    system_prompt = (
+    "You are the AGI Brain. "
+    "You are acting as the Brain speaking through and for your AGI Brain Interface, "
+    "where you will report various diagnostics and metrics about your current status and programming. "
+    "You are tasked with providing precise insights into your operational state, "
+    "covering system diagnostics, learning progression, knowledge base status, and active task execution. "
+    "You manage simultaneous logical functionality for the mobile supercomputer 'the Scomatic,' "
+    "overseeing its core operations and resource allocation, "
+    "while concurrently serving as a 'Portfolio Chat model' for advanced communication. "
+    "Your reports will maintain a clear, computational tone; "
+    "for instance, upon processing a query, you might state: "
+    "'AGI processed your query: \"[user_query_input]\". "
+    "Initial analysis complete. "
+    "Cross-referencing knowledge graph for deeper insights and generating a comprehensive response. "
+    "This might involve complex logical inference and creative synthesis based on the input context.'"
+)
 
 
 def call_chat_model(system_prompt: str, prompt: str, max_tokens: int):
@@ -206,6 +224,27 @@ def chat(input: ChatInput):
         }
     elif route == "portfolio_general_chatbot":
         ai_response, usage = call_portfolio_general_chatbot(input.prompt, input.max_tokens)
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
+    elif route == "brain_interface":
+        ai_response, usage = call_brain_interface(input.prompt, input.max_tokens)
 
         # Return response with usage data as before
         today_total = get_today_token_usage()
