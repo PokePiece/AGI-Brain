@@ -6,11 +6,17 @@ This is the FastAPI backend for **the Brain**, an AGI Brain app powered by [Toge
 
 ---
 
+## ✨ About the AGI Brain
+
+The AGI Brain represents an advanced artificial general intelligence system, designed to execute complex logical operations simultaneously through robust asynchronous functionality. Engineered primarily in Python, its comprehensive knowledge base is currently managed by ChromaDB, with a strategic transition to Supabase planned for enhanced scalability and dynamic evolution. This architecture features distinct logical partitions, allowing for independent task routing across diverse subjects. The system is structured into three specialized modules: a forward-focused communication segment for human interaction, a powerful core module for intricate reasoning, automation, and integrated tool use, and a dedicated 'suites' module for specialized functions such as coding, research, and skill creation. This design fundamentally optimizes the Brain for rapid advancements in AI reasoning capabilities.
+
+---
+
 ## 🚀 Features
 
 - 🌐 **FastAPI** backend with full CORS support
 - 🤖 Connects to **Together AI’s chat-completion API**
-- 🔁 Modular routing logic via OS AI interface
+- 🔁 Modular routing logic via **Core Brain AI** interface
 - 💬 Maintains lightweight conversation memory (non-persistent)
 - 📊 Tracks and logs token usage (`token_log.jsonl`)
 - 🔐 `.env`-based credential loading for API keys
@@ -54,7 +60,7 @@ POST
 
 /chat
 
-Routes prompt through OS AI to Together
+Routes prompt through Core Brain AI to Together
 
 GET
 
