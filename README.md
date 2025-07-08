@@ -1,5 +1,3 @@
-Markdown
-
 # 🧠 The Brain
 
 AGI Brain App
