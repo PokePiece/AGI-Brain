@@ -76,7 +76,9 @@ app.add_middleware(
     "https://scomaton.dilloncarey.com",  # If you ever serve frontend here
     "https://dilloncarey.com",
     "https://www.dilloncarey.com",
-],  # Or restrict to your frontend domain
+    "https://brain.dilloncarey.com/",
+],  # Or restrict to your frontend doma
+    in
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
     allow_headers=["*"],
