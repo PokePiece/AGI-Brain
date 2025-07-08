@@ -77,8 +77,7 @@ app.add_middleware(
     "https://dilloncarey.com",
     "https://www.dilloncarey.com",
     "https://brain.dilloncarey.com/",
-],  # Or restrict to your frontend doma
-    in
+],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
     allow_headers=["*"],
