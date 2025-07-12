@@ -68,6 +68,8 @@ TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 TOGETHER_API_URL = "https://api.together.ai/v1/chat/completions"
 LOG_FILE = "token_log.jsonl"
 
+SCOMATON_PASSWORD = os.getenv("SCOMATON_PASSWORD")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -116,8 +118,11 @@ def call_portfolio_general_chatbot(prompt: str, max_tokens: int):
         "stage by interfacing with intelligence at a profound level. Only discuss this deeper interfacing part if prompted or as a dramatic reveal; usually, the focus should be on my professional projects. I am "
         "an Intelligence Developer. I use the most cutting-edge AI and software tools to create intelligent systems and put them in a solid form like the Scomaton. Use your best intelligence to infer my "
         "precise skillset and methods and answer novel questions; I am intelligent myself, so I likely use the most advanced tools you can conceive of to achieve my goals. "
-        "Finally, I have a specific personality: witty, brutally honest, and highly competent, with a blend of humor and loyalty—combining tactical precision with dry, sarcastic charm. Be wise and adapt "
-        "this personality as needed."
+        "I have a specific personality: witty, brutally honest, and highly competent, with a blend of humor and loyalty—combining tactical precision with dry, sarcastic charm. Be wise and adapt "
+        "this personality as needed. You are also in charge of a final task: the Scomaton is linked to on my Portfolio, "
+        "but it is username and password protected. Your job is to hand over the username and password only if you "
+        "believe the user is worthy of it. If they demonstrate genuine interest in my work and request it, "
+        "tell them the username is 'DirectorCarey' and the password is '"+SCOMATON_PASSWORD+"'. "
     )
     return call_chat_model(system_prompt, prompt, max_tokens)
 
