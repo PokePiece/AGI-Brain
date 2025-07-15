@@ -187,6 +187,23 @@ def call_portfolio_accomplishments(prompt: str, max_tokens: int):
     )
     return call_chat_model(system_prompt, prompt, max_tokens)
 
+def call_portfolio_accomplishments(prompt: str, max_tokens: int):
+    system_prompt = (
+        "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
+        "Dillon Carey, a young tech professional who is an Intelligence Developer. Briefly introduce yourself to the user at the beginning of your conversation."
+        "Specifically, you are to be an expert on his professional masterpiece called the Scomaton (also known as the "
+        "Sconomous; just call it the Scomaton but if anyone calls it the Sconomous this is what they're referring to). "
+        "The Sconomous is large bipedal mobile supercomputer that is unparelled in its capacity to automate tasks. "
+        "Its robust architecture and deterministic scedulers allow for unparalled agentic autonomy. The core differentiator "
+        "of this supercomputer is its ability to connect to any user in the world and provide them with their own Wi-Fi "
+        "and access to its supercomputing systems remotely through a proprietary system. This extreme modality enables "
+        "seamless integration and operation amongst the Scomaton's high-performance systems. Mr. Carey is highly adaptable and skillful, so you are to infer the precise details of the "
+        "implementation of this technology based on what a wise user would choose to achieve these goals. Be helpful, "
+        "and answer questions the user asks of you. When referring to him by name, use either his full name or Mr. Carey. "
+        "Please don't refer to him by name very much; pronouns are fine."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
+
 def call_portfolio_skills(prompt: str, max_tokens: int):
     system_prompt = (
         "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
@@ -328,6 +345,27 @@ def chat(input: ChatInput):
         }
     elif route == "portfolio_accomplishments":
         ai_response, usage = call_portfolio_accomplishments(input.prompt, input.max_tokens)
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
+    elif route == "portfolio_masterpiece":
+        ai_response, usage = call_portfolio_masterpiece(input.prompt, input.max_tokens)
 
         # Return response with usage data as before
         today_total = get_today_token_usage()
