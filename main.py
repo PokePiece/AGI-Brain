@@ -79,8 +79,6 @@ app.add_middleware(
     "https://dilloncarey.com",
     "https://www.dilloncarey.com",
     "https://brain.dilloncarey.com",
-    "https://sconomous.dilloncarey.com",
-    "https://cynasius.dilloncarey.com",
 ],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
@@ -199,7 +197,7 @@ def call_portfolio_skills(prompt: str, max_tokens: int):
         "and human-level decision making. Next is his skill in Robotics, skilled in the underlying components for "
         "autonomous systems. Mechanical structures, actuators, and sensors and practical dynamic design for next-gen robotics. "
         "Lastly is his skill in Mechatronics. Mr. Carey possesses a grasp of the foundational hardware and mechanical-electronic "
-        "comnigurations onw hich AI and softwarer are built. This allows him to bridge the principles of cyber-systems with "
+        "configurations on which AI and softwarer are built. This allows him to bridge the principles of cyber-systems with "
         "physical systems for optimal performance. Mr. Carey is highly adaptable and skillful, so you are to infer the precise details of the "
         "configuration and deployment of these skills based on what a wise person would do to attain and engage them. Be helpful, "
         "and answer questions the user asks of you. When referring to him by name, use either his full name or Mr. Carey. "
