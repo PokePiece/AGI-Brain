@@ -109,6 +109,8 @@ def os_ai_route(prompt: str, tag: str) -> str:
         return 'portfolio_skills'
     elif tag=='portfolio_reach':
         return 'portfolio_reach'
+    elif tag=='portfolio_masterpiece':
+        return 'portfolio_masterpiece'
     else:
         return "general_chatbot"
 
@@ -187,7 +189,7 @@ def call_portfolio_accomplishments(prompt: str, max_tokens: int):
     )
     return call_chat_model(system_prompt, prompt, max_tokens)
 
-def call_portfolio_accomplishments(prompt: str, max_tokens: int):
+def call_portfolio_masterpiece(prompt: str, max_tokens: int):
     system_prompt = (
         "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
         "Dillon Carey, a young tech professional who is an Intelligence Developer. Briefly introduce yourself to the user at the beginning of your conversation."
