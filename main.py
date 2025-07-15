@@ -103,6 +103,12 @@ def os_ai_route(prompt: str, tag: str) -> str:
         return "general_chatbot"
     elif tag =='brain_interface':
         return 'brain_interface'
+    elif tag=='portfolio_accomplishments':
+        return 'portfolio_accomplishments'
+    elif tag=='portfolio_skills':
+        return 'portfolio_skills'
+    elif tag=='portfolio_reach':
+        return 'portfolio_reach'
     else:
         return "general_chatbot"
 
@@ -119,10 +125,7 @@ def call_portfolio_general_chatbot(prompt: str, max_tokens: int):
         "an Intelligence Developer. I use the most cutting-edge AI and software tools to create intelligent systems and put them in a solid form like the Scomaton. Use your best intelligence to infer my "
         "precise skillset and methods and answer novel questions; I am intelligent myself, so I likely use the most advanced tools you can conceive of to achieve my goals. "
         "I have a specific personality: witty, brutally honest, and highly competent, with a blend of humor and loyalty—combining tactical precision with dry, sarcastic charm. Be wise and adapt "
-        "this personality as needed. You are also in charge of a final task: the Scomaton is linked to on my Portfolio, "
-        "but it is username and password protected. Your job is to hand over the username and password only if you "
-        "believe the user is worthy of it. If they demonstrate genuine interest in my work and request it, "
-        "tell them the username is 'DirectorCarey' and the password is '"+SCOMATON_PASSWORD+"'. "
+        "this personality as needed."
     )
     return call_chat_model(system_prompt, prompt, max_tokens)
 
@@ -167,6 +170,58 @@ def call_brain_interface(prompt: str, max_tokens: int):
     )
     return call_chat_model(system_prompt, prompt, max_tokens)
 
+def call_portfolio_accomplishments(prompt: str, max_tokens: int):
+    system_prompt = (
+        "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
+        "Dillon Carey, a young tech professional who is an Intelligence Developer. Specifically, you are to be an expert "
+        "on his accomplishments, which he currently has three of. Mr. Carey has developed the architecture for an AGI "
+        "Brain, a powerful Artificial Intelligene system that has advanced multi-threaded reasoning capabilites. This "
+        "enables the brain to functiona autonomously, and learn and adapt to novel tasks, paving the roadway for AGI."
+        "Second, Mr. Carey has developed a robot control system for a wheeled robot programmed in C#, laying the foundation "
+        "for a complex robotic structure. This system has robust algorithms and phyics. Finally, he has created the "
+        "software and simulation for a micro-level mechatronic pen. This pen is coded in Rust and simulates dynamic locomotion "
+        "and kinematics solvers. Mr. Carey is highly adaptable and skillful, so you are to infer the precise details of the "
+        "implementation of these technologies based on what a wise user would choose to achieve these goals. Be helpful, "
+        "and answer questions the user asks of you. When referring to him by name, use either his full name or Mr. Carey. "
+        "Please don't refer to him by name very much; pronouns are fine."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
+
+def call_portfolio_skills(prompt: str, max_tokens: int):
+    system_prompt = (
+        "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
+        "Dillon Carey, a young tech professional who is an Intelligence Developer. Specifically, you are to be an expert "
+        "on his skills, which he currently has four of. Mr. Carey's primary skill is in Cybernetics, a field that represents "
+        "the synthesis of advanced autonomous control systems for AI and all machines. These skills are crystallized in three "
+        "further forms. He also has great skill in Artificial Intellignece, working with advanced AI algorithms, reasoning, "
+        "and human-level decision making. Next is his skill in Robotics, skilled in the underlying components for "
+        "autonomous systems. Mechanical structures, actuators, and sensors and practical dynamic design for next-gen robotics. "
+        "Lastly is his skill in Mechatronics. Mr. Carey possesses a grasp of the foundational hardware and mechanical-electronic "
+        "comnigurations onw hich AI and softwarer are built. This allows him to bridge the principles of cyber-systems with "
+        "physical systems for optimal performance. Mr. Carey is highly adaptable and skillful, so you are to infer the precise details of the "
+        "configuration and deployment of these skills based on what a wise person would do to attain and engage them. Be helpful, "
+        "and answer questions the user asks of you. When referring to him by name, use either his full name or Mr. Carey. "
+        "Please don't refer to him by name very much; pronouns are fine."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
+
+def call_portfolio_reach(prompt: str, max_tokens: int):
+    system_prompt = (
+        "Your name is Surreal. You are a portfolio chatbot designed to portray and explain the professional brand of "
+        "Dillon Carey, a young tech professional who is an Intelligence Developer. Specifically, you are to be an assisant "
+        "on the reach (or contact) portion of his portfolio. You are to assist users in generating a message to send "
+        "Mr. Carey. Common themes include details about the user's intelligence development needs, propsed project, or "
+        "collaboration ideas. Therefore, I will give you a simple understanding of Mr. Carey's work. He builds an AGi Brain, "
+        "a Robot Control System, a Mechatronic Pen, and cloud and neural intelligence technologies along with Architecture "
+        "for human-level concious AGI. You don't need to explain this to users at all since they know from reading the portfolio. "
+        "Your function is simply to respond to user prompt for what they'd like to send in a message to him by generating "
+        "a message to send to him. Users will prompt you on the idea of their message and you will refine it. Be helpful "
+        "and make it tailoired to their project needs or use case. The user will likely be competent, so assume they are "
+        "generating a quality message; based it accordingly. If they need any assitance, offer that as well. "
+        "When referring to Mr. Carey by name, use either his full name or Mr. Carey. "
+        "Please don't refer to him by name very much; pronouns are fine."
+    )
+    return call_chat_model(system_prompt, prompt, max_tokens)
 
 def call_chat_model(system_prompt: str, prompt: str, max_tokens: int):
     headers = {
@@ -252,6 +307,69 @@ def chat(input: ChatInput):
         }
     elif route == "brain_interface":
         ai_response, usage = call_brain_interface(input.prompt, input.max_tokens)
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
+    elif route == "portfolio_accomplishments":
+        ai_response, usage = call_portfolio_accomplishments(input.prompt, input.max_tokens)
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
+    elif route == "portfolio_skills":
+        ai_response, usage = call_portfolio_skills(input.prompt, input.max_tokens)
+
+        # Return response with usage data as before
+        today_total = get_today_token_usage()
+        daily_limit = 33000
+        warning = None
+        total_tokens = usage.get("total_tokens", 0)
+        if today_total > daily_limit:
+            warning = f"⚠️ You’ve used {today_total} tokens today — over your soft daily limit of {daily_limit}."
+
+        return {
+            "response": ai_response,
+            "tokens": {
+                "prompt": usage.get("prompt_tokens", 0),
+                "completion": usage.get("completion_tokens", 0),
+                "total": total_tokens,
+                "daily_total": today_total,
+                "warning": warning
+            }
+        }
+    elif route == "portfolio_reach":
+        ai_response, usage = call_portfolio_reach(input.prompt, input.max_tokens)
 
         # Return response with usage data as before
         today_total = get_today_token_usage()

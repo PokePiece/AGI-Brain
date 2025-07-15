@@ -29,6 +29,14 @@ The AGI Brain represents an advanced artificial general intelligence system, des
 Install dependencies:
 
 ```bash
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+(when done
+deactivate
+)
+
 pip install -r requirements.txt
 Create a .env file:
 
