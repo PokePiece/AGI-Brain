@@ -81,6 +81,7 @@ app.add_middleware(
     "https://www.dilloncarey.com",
     "https://brain.dilloncarey.com",
     "https://nerves.dilloncarey.com",
+    "https://mints.dilloncarey.com",
 ],  # Or restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
