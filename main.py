@@ -75,14 +75,16 @@ SCOMATON_PASSWORD = os.getenv("SCOMATON_PASSWORD")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",  # Vite dev server
-    "https://scomaton.dilloncarey.com",  # If you ever serve frontend here
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://scomaton.dilloncarey.com", 
     "https://dilloncarey.com",
     "https://www.dilloncarey.com",
     "https://brain.dilloncarey.com",
     "https://nerves.dilloncarey.com",
     "https://mints.dilloncarey.com",
-],  # Or restrict to your frontend domain
+    "https://icebreaker.dilloncarey.com",
+],  
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
     allow_headers=["*"],
