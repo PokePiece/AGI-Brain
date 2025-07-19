@@ -84,6 +84,7 @@ app.add_middleware(
     "https://nerves.dilloncarey.com",
     "https://mints.dilloncarey.com",
     "https://icebreaker.dilloncarey.com",
+    "https://windmatrix.dilloncarey.com",
 ],  
     allow_credentials=True,
     allow_methods=["*"],  # Allow POST, OPTIONS, etc.
